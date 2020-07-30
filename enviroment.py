@@ -32,7 +32,7 @@ class Enviroment:
     
     def observe(self):
         if self.normalization == LOG_NORM:
-            return [[log2(x) for x in line] for line in self.matrix]
+            return [int(log2(x)) for line in self.matrix for x in line]
         else:
             return self.matrix
         # return observation

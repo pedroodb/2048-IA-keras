@@ -3,7 +3,7 @@ import random
 from enviroment import Enviroment, LOG_NORM
 
 def gather_data(env):
-    min_score = 1000
+    min_score = 1500
     trainingX, trainingY = [], []
     scores = []
     for i in range(10000):
@@ -29,4 +29,6 @@ def gather_data(env):
     print("Median: {}".format(np.median(scores)))
     return trainingX, trainingY
 
-gather_data(Enviroment(LOG_NORM))
+x, y = gather_data(Enviroment(LOG_NORM))
+np.savetxt("data/initial_data", x, delimiter=",")
+np.savetxt("data/initial_labels", y, delimiter=",")
