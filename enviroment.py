@@ -2,8 +2,6 @@ import random
 import copy
 from math import log2
 
-# Documentation on env class definition can be found in https://gym.openai.com/docs/#environments
-
 LOG_NORM = "log-norm"
 
 class Enviroment:
@@ -13,6 +11,10 @@ class Enviroment:
         self.score = 0
         self.add_tile()
         self.normalization = normalization
+
+
+    # Definition of enviroment functions (docs in https://gym.openai.com/docs/#environments)
+
 
     def reset(self):
         self.matrix = [[1 for x in range(4)] for y in range(4)]
@@ -25,14 +27,23 @@ class Enviroment:
         reward = - self.score
         if self.move(action):
             self.add_tile()
-        return (reward + self.score), self.observe(), self.locked()
-        # return reward, observation, done
+        return self.observe(), (reward + self.score), self.locked(), None
+        # return reward, observation, done, info
     
     def observe(self):
         if self.normalization == LOG_NORM:
             return [[log2(x) for x in line] for line in self.matrix]
         else:
             return self.matrix
+        # return observation
+
+    def render(self, mode = "human"):
+        for line in (self.matrix):
+            print([(tile if tile != 1 else 0) for tile in line])
+
+
+    # Definition of game logic's functions
+
 
     def move(self, direction):
         prev = copy.deepcopy(self)

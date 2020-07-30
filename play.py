@@ -6,4 +6,4 @@ if op == '1':
     a = InteractiveAgent(Enviroment())
 else:
     a = RandomAgent(Enviroment(), True)
-a.play()
+a.game()

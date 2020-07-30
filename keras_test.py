@@ -1,57 +1,32 @@
 import numpy as np
+import random
+from enviroment import Enviroment, LOG_NORM
 
-def get_data(file_name):
-    matrix_history = []
-    matrix_line = []
-    with open(file_name, "r") as mh:
-        while True:
-            c = mh.read(1)
-            if not c:
-                break
-            elif c != '\n':
-                matrix_line.append(int(c))
-            else:
-                matrix_history.append(matrix_line)
-                matrix_line = []
-    return np.asarray(matrix_history)
+def gather_data(env):
+    min_score = 1000
+    trainingX, trainingY = [], []
+    scores = []
+    for i in range(10000):
+        observation = env.reset()
+        score = 0
+        training_sampleX, training_sampleY = [], []
+        done = False
+        while not done:
+            action = random.randint(0,3)
+            one_hot_action = np.zeros(4)
+            one_hot_action[action] = 1
+            training_sampleX.append(observation)
+            training_sampleY.append(one_hot_action)
+            observation, reward, done, _ = env.step(action)
+            score += reward
+        print("Game ", i, " ended with score ", score)
+        if score > min_score:
+            scores.append(score)
+            trainingX += training_sampleX
+            trainingY += training_sampleY
+    trainingX, trainingY = np.array(trainingX), np.array(trainingY)
+    print("Average: {}".format(np.mean(scores)))
+    print("Median: {}".format(np.median(scores)))
+    return trainingX, trainingY
 
-def get_labels(file_name):
-    labels = []
-    with open(file_name, "r") as l:
-        while True:
-            c = l.read(1)
-            if not c:
-                break
-            elif c != '\n':
-                label_line = [0, 0, 0, 0]
-                label_line[int(c)] = 1
-                labels.append(label_line)
-    return np.asarray(labels)
-
-
-data = get_data("matrix_history.txt")
-labels = get_labels("movement_history.txt")
-
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.optimizers import SGD
-
-model = Sequential()
-model.add(Dense(64, activation='relu', input_dim=16))
-model.add(Dropout(0.5))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(4, activation='softmax'))
-
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(loss='categorical_crossentropy',
-              optimizer=sgd,
-              metrics=['accuracy'])
-
-model.fit(data, labels,
-          epochs=5000,
-          batch_size=128)
-
-score = model.evaluate(data, labels, batch_size=128)
-
+gather_data(Enviroment(LOG_NORM))
