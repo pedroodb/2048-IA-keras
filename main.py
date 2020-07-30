@@ -1,19 +1,14 @@
-from __future__ import division
 import argparse
 
-from PIL import Image
 import numpy as np
-import gym
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, Flatten, Convolution2D, Permute
 from tensorflow.keras.optimizers import Adam
-import tensorflow.keras.backend as K
 
 from rl.agents.dqn import DQNAgent
 from rl.policy import LinearAnnealedPolicy, BoltzmannQPolicy, EpsGreedyQPolicy
 from rl.memory import SequentialMemory
-from rl.core import Processor
 from rl.callbacks import FileLogger, ModelIntervalCheckpoint
 
 from enviroment import Enviroment
