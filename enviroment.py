@@ -1,11 +1,17 @@
 import random
 import copy
-from typing import Any, Dict, Tuple, List
 from math import log2
+from typing import Any, Dict, Tuple, List
+import numpy as np
+import gym
+from gym import spaces
 
-class Enviroment:
+class Enviroment(gym.Env):
 
     def __init__(self) -> None:
+        self.action_space = spaces.Discrete(4)
+        #self.observation_space = spaces.Box(low=0, high=1, shape=(4,4), dtype=np.float)
+        
         self.matrix: List[List[int]] = [[1 for x in range(4)] for y in range(4)]
         self.score: int = 0
         self.add_tile()
@@ -30,7 +36,7 @@ class Enviroment:
     
     def observe(self) -> List[float]:
         # Normalize by obtaining log2 of tile and then dividing by 12 (2^12 = 8192)
-        return [log2(x)/12 for line in self.matrix for x in line]
+        return [[log2(x)/12 for x in line] for line in self.matrix]
         # return observation
 
     def render(self, mode: str = "human", close: bool = False) -> None:
