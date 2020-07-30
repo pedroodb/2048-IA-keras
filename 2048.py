@@ -85,7 +85,9 @@ class Game:
     def play(self):
         playing = True
         while playing:
+            print("Score: ", self.matrix.score)
             self.matrix.print()
+            print()
             movement = input()
             if self.move(movement):
                 playing = self.matrix.add_tile()
