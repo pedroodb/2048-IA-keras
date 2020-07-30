@@ -1,4 +1,3 @@
-from enviroment import Enviroment
 import random
 
 class InteractiveAgent:
@@ -10,8 +9,8 @@ class InteractiveAgent:
         's': 3,
     }
 
-    def __init__(self):
-        self.env = Enviroment()
+    def __init__(self, enviroment):
+        self.env = enviroment
 
     def print_matrix(self, matrix):
         for line in matrix:
@@ -33,8 +32,9 @@ class InteractiveAgent:
 
 class RandomAgent:
 
-    def __init__(self):
-        self.env = Enviroment()
+    def __init__(self, enviroment, verbose = False):
+        self.env = enviroment
+        self.verbose = verbose
 
     def print_matrix(self, matrix):
         for line in matrix:
@@ -42,11 +42,13 @@ class RandomAgent:
 
     def play(self):
         done = False
-        self.print_matrix(self.env.matrix)
-        print()
+        if self.verbose:
+            self.print_matrix(self.env.matrix)
+            print()
         while not done:
             movement = random.randint(0,3)
             reward, state, done = self.env.step(movement)
-            self.print_matrix(state)
-            print("You earned ", reward, ", total score: ", self.env.score)
-        print('\nYou lost, final score: ', self.env.score)
+            if self.verbose:
+                self.print_matrix(state)
+                print("You earned ", reward, ", total score: ", self.env.score)
+        if self.verbose: print('\nYou lost, final score: ', self.env.score)

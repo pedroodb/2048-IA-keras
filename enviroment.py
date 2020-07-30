@@ -8,6 +8,11 @@ class Enviroment:
         self.score = 0
         self.add_tile()
 
+    def reset(self):
+        self.matrix = [[1 for x in range(4)] for y in range(4)]
+        self.score = 0
+        self.add_tile()
+
     def step(self, action):
         reward = - self.score
         if self.move(action):
@@ -48,7 +53,7 @@ class Enviroment:
         free_list = self.free_list()
         if free_list:
             coordinates = random.choice(free_list)
-            self.matrix[coordinates[0]][coordinates[1]] = 2
+            self.matrix[coordinates[0]][coordinates[1]] = 2 if (random.randint(1, 10) < 8) else 4
 
     def locked(self):
         clone = copy.deepcopy(self)
@@ -62,7 +67,7 @@ class Enviroment:
         self.score += self.matrix[tile2[0]][tile2[1]]
 
     def free_list(self):
-        return [(i,j) for i in range(0, 4) for j in range(0, 4) if self.matrix[i][j] == 1]
+        return [(i, j) for i in range(0, 4) for j in range(0, 4) if self.matrix[i][j] == 1]
 
     def equals(self, other_matrix):
         return self.matrix == other_matrix.matrix
