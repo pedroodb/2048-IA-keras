@@ -1,6 +1,8 @@
 import numpy as np
 import random
-from enviroment import Enviroment, LOG_NORM
+from enviroment import Enviroment
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 
 def gather_data(env):
     min_score = 1500
@@ -29,6 +31,31 @@ def gather_data(env):
     print("Median: {}".format(np.median(scores)))
     return trainingX, trainingY
 
-x, y = gather_data(Enviroment(LOG_NORM))
+def create_model():
+    model = Sequential()
+    model.add(Dense(128, input_shape=(4,), activation="relu"))
+    model.add(Dropout(0.6))
+    
+    model.add(Dense(256, activation="relu"))
+    model.add(Dropout(0.6))
+    
+    model.add(Dense(512, activation="relu"))
+    model.add(Dropout(0.6))
+    
+    model.add(Dense(256, activation="relu"))
+    model.add(Dropout(0.6))
+    
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.6))
+    model.add(Dense(2, activation="softmax"))
+    
+    model.compile(
+        loss="categorical_crossentropy",
+        optimizer="adam",
+        metrics=["accuracy"])
+    return model
+
+
+x, y = gather_data(Enviroment())
 np.savetxt("data/initial_data", x, delimiter=",")
 np.savetxt("data/initial_labels", y, delimiter=",")
