@@ -1,35 +1,23 @@
 import random
-import math
+import copy
 
 
 class Matrix:
 
-    matrix = [[0 for x in range(4)] for y in range(4)]
-
     def __init__(self):
-        self.add_two()
-
-    def clone(self):
-        new_matrix = Matrix()
-        for i in range(0, 4):
-            for j in range(0, 4):
-                new_matrix.matrix[i][j] = self.matrix[i][j]
-        return new_matrix
+        self.matrix = [[1 for x in range(4)] for y in range(4)]
+        self.score = 0
+        self.add_tile()
 
     def equals(self, other_matrix):
-        equals = True
-        for i in range(0, 4):
-            for j in range(0, 4):
-                if other_matrix.matrix[i][j] != self.matrix[i][j]:
-                    equals = False
-        return equals
+        return self.matrix == other_matrix.matrix
 
     def print(self):
-        for i in self.matrix:
-            print(i)
+        for line in self.matrix:
+            print([(tile if tile != 1 else 0) for tile in line])
 
     def move(self, direction):
-        prev = self.clone()
+        prev = copy.deepcopy(self)
         for i in range(0, direction):
             self.rotate()
         self.move_right()
@@ -43,29 +31,29 @@ class Matrix:
             self.matrix[i] = list(self.matrix[i])
 
     def move_right(self):
-        for line in self.matrix:
+        for (line_idx, line) in enumerate(self.matrix):
+            joint = [False for i in range(4)]
             for i in range(2, -1, -1):
-                if line[i] != 0:
-                    joint = False
+                if line[i] != 1:
                     for j in range(i, 3):
-                        if line[j+1] == 0:
+                        if line[j+1] == 1:
                             line[j+1] = line[j]
-                            line[j] = 0
+                            line[j] = 1
                         elif line[j+1] == line[j]:
-                            if not joint:
-                                line[j + 1] = (line[j]*2)
-                                line[j] = 0
-                                joint = True
+                            if not joint[j+1]:
+                                self.join((line_idx, j), (line_idx, j+1))
+                                joint[j+1] = True
+                                break
+    
+    def join(self, tile1, tile2):
+        self.matrix[tile1[0]][tile1[1]] = 1
+        self.matrix[tile2[0]][tile2[1]] *= 2
+        self.score += self.matrix[tile2[0]][tile2[1]]
 
     def free_list(self):
-        free_list = list()
-        for i in range(0, 4):
-            for j in range(0, 4):
-                if self.matrix[i][j] == 0:
-                    free_list.append((i, j))
-        return free_list
-
-    def add_two(self):
+        return [(i,j) for i in range(0, 4) for j in range(0, 4) if self.matrix[i][j] == 1]
+        
+    def add_tile(self):
         free_list = self.free_list()
         if free_list:
             coordinates = random.choice(free_list)
@@ -76,13 +64,6 @@ class Matrix:
 class Game:
 
     matrix = Matrix()
-
-    @staticmethod
-    def save_to_file(matrix, movement):
-        with open("matrix_history.txt", "a") as matrix_history:
-            print(matrix, file=matrix_history)
-        with open("movement_history.txt", "a") as movement_history:
-            print(movement, file=movement_history)
 
     @staticmethod
     def get_direction(move):
@@ -99,39 +80,16 @@ class Game:
         if direction != -1:
             return self.matrix.move(direction)
         else:
-            print('Invalid movement, try with w,a,s or d (hola soy Juan)'
-                  '')
-
-    def print_matrix(self):
-        self.matrix.print()
+            print('Invalid movement, try with w,a,s or d')
 
     def play(self):
         playing = True
         while playing:
-            self.print_matrix()
+            self.matrix.print()
             movement = input()
-            f = Formater()
-            if self.get_direction(movement) != -1:
-                self.save_to_file(f.format(self.matrix.matrix), self.get_direction(movement))
             if self.move(movement):
-                playing = self.matrix.add_two()
+                playing = self.matrix.add_tile()
         print('You lost')
-
-
-class Formater:
-
-    def log(self, num):
-        if num != 0:
-            return int(math.log(num, 2))
-        else:
-            return 0
-
-    def format(self, matrix):
-        formated_str = ""
-        for line in matrix:
-            for i in line:
-                formated_str += str(self.log(i))
-        return formated_str
 
 g = Game()
 g.play()
