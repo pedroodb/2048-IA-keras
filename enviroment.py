@@ -1,24 +1,38 @@
 import random
 import copy
+from math import log2
+
+# Documentation on env class definition can be found in https://gym.openai.com/docs/#environments
+
+LOG_NORM = "log-norm"
 
 class Enviroment:
 
-    def __init__(self):
+    def __init__(self, normalization = None):
         self.matrix = [[1 for x in range(4)] for y in range(4)]
         self.score = 0
         self.add_tile()
+        self.normalization = normalization
 
     def reset(self):
         self.matrix = [[1 for x in range(4)] for y in range(4)]
         self.score = 0
         self.add_tile()
+        return self.observe()
+        # return observation
 
     def step(self, action):
         reward = - self.score
         if self.move(action):
             self.add_tile()
-        return (reward + self.score), self.matrix, self.locked()
-        # return reward, state, done
+        return (reward + self.score), self.observe(), self.locked()
+        # return reward, observation, done
+    
+    def observe(self):
+        if self.normalization == LOG_NORM:
+            return [[log2(x) for x in line] for line in self.matrix]
+        else:
+            return self.matrix
 
     def move(self, direction):
         prev = copy.deepcopy(self)
