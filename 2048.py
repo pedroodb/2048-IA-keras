@@ -2,19 +2,19 @@ import random
 import copy
 
 
-class Matrix:
+class Enviroment:
 
     def __init__(self):
         self.matrix = [[1 for x in range(4)] for y in range(4)]
         self.score = 0
         self.add_tile()
 
-    def equals(self, other_matrix):
-        return self.matrix == other_matrix.matrix
-
-    def print(self):
-        for line in self.matrix:
-            print([(tile if tile != 1 else 0) for tile in line])
+    def step(self, action):
+        reward = - self.score
+        if self.move(action):
+            self.add_tile()
+        return (reward + self.score), self.matrix, self.locked()
+        # return reward, state, done
 
     def move(self, direction):
         prev = copy.deepcopy(self)
@@ -44,7 +44,19 @@ class Matrix:
                                 self.join((line_idx, j), (line_idx, j+1))
                                 joint[j+1] = True
                                 break
-    
+        
+    def add_tile(self):
+        free_list = self.free_list()
+        if free_list:
+            coordinates = random.choice(free_list)
+            self.matrix[coordinates[0]][coordinates[1]] = 2
+
+    def locked(self):
+        clone = copy.deepcopy(self)
+        for direction in range(4):
+            if clone.move(direction): return False
+        return True
+            
     def join(self, tile1, tile2):
         self.matrix[tile1[0]][tile1[1]] = 1
         self.matrix[tile2[0]][tile2[1]] *= 2
@@ -52,46 +64,40 @@ class Matrix:
 
     def free_list(self):
         return [(i,j) for i in range(0, 4) for j in range(0, 4) if self.matrix[i][j] == 1]
-        
-    def add_tile(self):
-        free_list = self.free_list()
-        if free_list:
-            coordinates = random.choice(free_list)
-            self.matrix[coordinates[0]][coordinates[1]] = 2
-            return True
+
+    def equals(self, other_matrix):
+        return self.matrix == other_matrix.matrix
 
 
-class Game:
+class InteractiveAgent:
 
-    matrix = Matrix()
+    directions = {
+        'd': 0,
+        'w': 1,
+        'a': 2,
+        's': 3,
+    }
 
-    @staticmethod
-    def get_direction(move):
-        # Get a movement direction from w,a,s or d
-        return {
-            'd': 0,
-            'w': 1,
-            'a': 2,
-            's': 3,
-        }.get(move, -1)
+    def __init__(self):
+        self.env = Enviroment()
 
-    def move(self, move):
-        direction = self.get_direction(move)
-        if direction != -1:
-            return self.matrix.move(direction)
-        else:
-            print('Invalid movement, try with w,a,s or d')
+    def print_matrix(self, matrix):
+        for line in matrix:
+            print([(tile if tile != 1 else 0) for tile in line])
 
     def play(self):
-        playing = True
-        while playing:
-            print("Score: ", self.matrix.score)
-            self.matrix.print()
-            print()
-            movement = input()
-            if self.move(movement):
-                playing = self.matrix.add_tile()
+        done = False
+        self.print_matrix(self.env.matrix)
+        print()
+        while not done:
+            movement = InteractiveAgent.directions.get(input())
+            if movement == None:
+                print('Invalid movement, try with w, a, s or d')
+            else:
+                reward, state, done = self.env.step(movement)
+                self.print_matrix(state)
+                print("You earned ", reward)
         print('You lost')
 
-g = Game()
+g = InteractiveAgent()
 g.play()
